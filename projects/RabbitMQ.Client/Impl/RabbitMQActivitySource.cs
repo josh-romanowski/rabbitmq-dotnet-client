@@ -46,6 +46,9 @@ namespace RabbitMQ.Client
         public static Func<IReadOnlyBasicProperties, ActivityContext> ContextExtractor { get; set; } =
             DefaultContextExtractor;
 
+        public static bool UseExtractedContextAsParent { get; set; } = true;
+        public static bool UseExtractedContextAsLink { get; set; } = true;
+
         public static bool UseRoutingKeyAsOperationName { get; set; } = true;
         internal static bool PublisherHasListeners => s_publisherSource.HasListeners();
 
@@ -109,6 +112,7 @@ namespace RabbitMQ.Client
             }
 
             // Extract the PropagationContext of the upstream parent from the message headers.
+            ActivityContext extractedContext = ContextExtractor(readOnlyBasicProperties);
             Activity? activity = s_subscriberSource.StartLinkedRabbitMQActivity(
                 UseRoutingKeyAsOperationName ? $"{routingKey} {MessagingOperationTypeReceive}" : MessagingOperationTypeReceive, ActivityKind.Consumer,
                 ContextExtractor(readOnlyBasicProperties));

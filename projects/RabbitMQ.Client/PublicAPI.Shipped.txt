@@ -538,6 +538,10 @@ RabbitMQ.Client.PublicationAddress.PublicationAddress(string exchangeType, strin
 RabbitMQ.Client.QueueDeclareOk
 RabbitMQ.Client.QueueDeclareOk.QueueDeclareOk(string queueName, uint messageCount, uint consumerCount) -> void
 RabbitMQ.Client.RabbitMQActivitySource
+static RabbitMQ.Client.RabbitMQActivitySource.UseExtractedContextAsParent.get -> bool
+static RabbitMQ.Client.RabbitMQActivitySource.UseExtractedContextAsParent.set -> void
+static RabbitMQ.Client.RabbitMQActivitySource.UseExtractedContextAsLink.get -> bool
+static RabbitMQ.Client.RabbitMQActivitySource.UseExtractedContextAsLink.set -> void
 RabbitMQ.Client.ReadOnlyBasicProperties
 RabbitMQ.Client.ReadOnlyBasicProperties.AppId.get -> string
 RabbitMQ.Client.ReadOnlyBasicProperties.ClusterId.get -> string

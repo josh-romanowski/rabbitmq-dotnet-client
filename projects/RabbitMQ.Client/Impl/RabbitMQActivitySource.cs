@@ -46,8 +46,8 @@ namespace RabbitMQ.Client
         public static Func<IReadOnlyBasicProperties, ActivityContext> ContextExtractor { get; set; } =
             DefaultContextExtractor;
 
-        public static bool UseExtractedContextAsParent { get; set; } = true;
         public static bool UseExtractedContextAsLink { get; set; } = true;
+        public static bool UseExtractedContextAsParent { get; set; } = false;
 
         public static bool UseRoutingKeyAsOperationName { get; set; } = true;
         internal static bool PublisherHasListeners => s_publisherSource.HasListeners();

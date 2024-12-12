@@ -46,8 +46,8 @@ namespace RabbitMQ.Client
         public static Func<IReadOnlyBasicProperties, ActivityContext> ContextExtractor { get; set; } =
             DefaultContextExtractor;
 
-        public static bool UseExtractedContextAsLink { get; set; } = true;
-        public static bool UseExtractedContextAsParent { get; set; } = false;
+        public static bool UseContextAsLink { get; set; } = true;
+        public static bool UseContextAsParent { get; set; } = false;
 
         public static bool UseRoutingKeyAsOperationName { get; set; } = true;
         internal static bool PublisherHasListeners => s_publisherSource.HasListeners();
@@ -73,7 +73,9 @@ namespace RabbitMQ.Client
                     ActivityKind.Producer)
                 : s_publisherSource.StartLinkedRabbitMQActivity(
                     UseRoutingKeyAsOperationName ? $"{routingKey} {MessagingOperationTypeSend}" : MessagingOperationTypeSend,
-                    ActivityKind.Producer, linkedContext);
+                    ActivityKind.Producer, 
+                    UseContextAsLink ? linkedContext : default,
+                    UseContextAsParent ? linkedContext : default);
             if (activity != null && activity.IsAllDataRequested)
             {
                 PopulateMessagingTags(MessagingOperationTypeSend, routingKey, exchange, 0, bodySize, activity);
@@ -114,8 +116,10 @@ namespace RabbitMQ.Client
             // Extract the PropagationContext of the upstream parent from the message headers.
             ActivityContext extractedContext = ContextExtractor(readOnlyBasicProperties);
             Activity? activity = s_subscriberSource.StartLinkedRabbitMQActivity(
-                UseRoutingKeyAsOperationName ? $"{routingKey} {MessagingOperationTypeReceive}" : MessagingOperationTypeReceive, ActivityKind.Consumer,
-                ContextExtractor(readOnlyBasicProperties));
+                UseRoutingKeyAsOperationName ? $"{routingKey} {MessagingOperationTypeReceive}" : MessagingOperationTypeReceive, 
+                ActivityKind.Consumer, 
+                UseContextAsLink ? extractedContext : default,
+                UseContextAsParent ? extractedContext : default);
             if (activity != null && activity.IsAllDataRequested)
             {
                 PopulateMessagingTags(MessagingOperationTypeReceive, routingKey, exchange, deliveryTag, readOnlyBasicProperties,
@@ -134,9 +138,12 @@ namespace RabbitMQ.Client
             }
 
             // Extract the PropagationContext of the upstream parent from the message headers.
+            ActivityContext extractedContext = ContextExtractor(basicProperties);
             Activity? activity = s_subscriberSource.StartLinkedRabbitMQActivity(
                 UseRoutingKeyAsOperationName ? $"{routingKey} {MessagingOperationTypeProcess}" : MessagingOperationTypeProcess,
-                ActivityKind.Consumer, ContextExtractor(basicProperties));
+                ActivityKind.Consumer,
+                UseContextAsLink ? extractedContext : default,
+                UseContextAsParent ? extractedContext : default);
             if (activity != null && activity.IsAllDataRequested)
             {
                 PopulateMessagingTags(MessagingOperationTypeProcess, routingKey, exchange,
